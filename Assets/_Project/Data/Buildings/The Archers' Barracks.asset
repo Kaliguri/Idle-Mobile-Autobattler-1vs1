@@ -15,6 +15,6 @@ MonoBehaviour:
   buildingName: The Archers' Barracks
   canSpawnUnits: 1
   unitToSpawn: {fileID: 11400000, guid: e9b4e0f6e4f12c049adc75d744019305, type: 2}
-  spawnInterval: 5
+  spawnInterval: 7
   canShoot: 0
   buildingVisualPrefab: {fileID: 4933946567380175521, guid: ee3090f2657857d4aa7e880ea498801c, type: 3}

@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    public UnitData unitData;
-    public Team team;
+    [SerializeField] private UnitData unitData;
+    [SerializeField] private Team team;
+
+    public UnitData UnitData => unitData;
+    public Team Team => team;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

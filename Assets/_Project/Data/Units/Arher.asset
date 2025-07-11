@@ -18,5 +18,5 @@ MonoBehaviour:
   attackRange: 50
   movementSpeed: 3
   attackSpeed: 1
-  attackType: 0
+  attackType: 1
   unitVisualPrefab: {fileID: 7798658245252836942, guid: b024524b94393444381c7ea1f6cd753f, type: 3}
