@@ -15,7 +15,7 @@ MonoBehaviour:
   unitName: Archer
   maxHealth: 100
   damage: 10
-  attackRange: 50
+  attackRange: 10
   movementSpeed: 3
   attackSpeed: 1
   attackType: 1
