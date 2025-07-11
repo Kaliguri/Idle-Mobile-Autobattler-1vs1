@@ -32,14 +32,14 @@ public class BattleInfoSingleton : MonoBehaviour
     private void FindAndRegisterAllWinPoints()
     {
         WinPoint[] winPoints = FindObjectsOfType<WinPoint>();
-        Debug.Log($"Найдено {winPoints.Length} WinPoint объектов на сцене");
+        //Debug.Log($"Найдено {winPoints.Length} WinPoint объектов на сцене");
         
         foreach (WinPoint winPoint in winPoints)
         {
             if (winPoint != null && winPoint.Team != Team.Neutral)
             {
                 RegisterWinPoint(winPoint);
-                Debug.Log($"Автоматически зарегистрирован WinPoint для команды {winPoint.Team}: {winPoint.name}");
+                //Debug.Log($"Автоматически зарегистрирован WinPoint для команды {winPoint.Team}: {winPoint.name}");
             }
         }
     }
