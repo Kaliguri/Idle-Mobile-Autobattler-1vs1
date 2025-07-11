@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
+    public UnitData unitData;
+    public Team team;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -14,8 +17,9 @@ public class Unit : MonoBehaviour
         
     }
 
-    public void Initialize()
+    public void Initialize(UnitData data, Team unitTeam)
     {
-
+        unitData = data;
+        team = unitTeam;
     }
 }

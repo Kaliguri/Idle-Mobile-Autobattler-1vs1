@@ -4,20 +4,32 @@ using UnityEngine;
 public class UnitData : ScriptableObject
 {
     [Header("Basic Info")]
-    public string unitName;
+    [SerializeField] private string unitName;
     
     [Header("Stats")]
-    public float maxHealth;
-    public float damage;
-    public float attackRange;
-    public float movementSpeed;
-    public float attackSpeed;
+    [SerializeField] private float maxHealth = 100;
+    [SerializeField] private float damage = 10;
+    [SerializeField] private float attackRange = 10;
+    [SerializeField] private float movementSpeed = 10;
+    [SerializeField] private float attackSpeed = 1;
     
     [Header("Combat")]
-    public AttackType attackType;
+    [SerializeField] private AttackType attackType;
     
     [Header("Visual")]
-    public GameObject unitVisualPrefab;
+    [SerializeField] private GameObject unitVisualPrefab;
+
+    // Public properties for accessing the data
+    public string UnitName => unitName;
+
+    public float MaxHealth => maxHealth;
+    public float Damage => damage;
+    public float AttackRange => attackRange;
+    public float MovementSpeed => movementSpeed;
+    public float AttackSpeed => attackSpeed;
+
+    public AttackType AttackType => attackType;
+    public GameObject UnitVisualPrefab => unitVisualPrefab;
 }
 
 public enum AttackType

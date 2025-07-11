@@ -11,14 +11,14 @@ public static class UnitFactory
         }
 
         // Создаем GameObject для юнита
-        GameObject unitGO = new GameObject($"Unit_{data.unitName}_{team}");
+        GameObject unitGO = new GameObject($"Unit_{data.UnitName}_{team}");
         unitGO.transform.position = position;
         // Добавляем компоненты
         Unit unit = AddComponents(unitGO);
         // Создаем визуальную часть
         CreateVisualPrefab(unitGO, data);
-        // Инициализируем юнит
-        unit.Initialize();
+        // Инициализируем юнит с данными и командой
+        unit.Initialize(data, team);
         
         return unit;
     }
@@ -34,9 +34,9 @@ public static class UnitFactory
 
     private static void CreateVisualPrefab(GameObject unitGO, UnitData data)
     {
-        if (data.unitVisualPrefab != null)
+        if (data.UnitVisualPrefab != null)
         {
-            GameObject visual = GameObject.Instantiate(data.unitVisualPrefab);
+            GameObject visual = GameObject.Instantiate(data.UnitVisualPrefab);
             visual.transform.SetParent(unitGO.transform);
             visual.transform.localPosition = Vector3.zero;
         }
@@ -45,6 +45,7 @@ public static class UnitFactory
 
 public enum Team
 {
-    Player,
-    Enemy
+    Player1,
+    Player2,
+    Neutral
 } 

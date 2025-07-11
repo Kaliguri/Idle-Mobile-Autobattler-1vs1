@@ -9,11 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fda3d9c020c19a3408a91811038ab8c8, type: 3}
-  m_Name: Swordsman
+  m_Script: {fileID: 11500000, guid: 9a4fc804b7c87b540a6864a1405a086f, type: 3}
+  m_Name: Swordman
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  damage: 10
+  unitName: Swordsman
+  maxHealth: 150
+  damage: 15
   attackRange: 10
   movementSpeed: 5
+  attackSpeed: 1
   attackType: 0
+  unitVisualPrefab: {fileID: 5260402933410301531, guid: a3891d48cdf94f24ca195b1faf01d80c, type: 3}
