@@ -41,7 +41,7 @@ public class BuildingTestSpawner : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Должно заспавниться здание - {buildingData.BuildingName} для команды {team}");
+        //Debug.Log($"Должно заспавниться здание - {buildingData.BuildingName} для команды {team}");
         Vector3 spawnPosition = GetMouseWorldPosition();
         BuildingFactory.CreateBuilding(buildingData, spawnPosition, team);
     }
