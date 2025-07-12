@@ -29,33 +29,13 @@ public static class UnitFactory
         // Устанавливаем UnitData
         unit.SetUnitData(data);
         
-        // Создаем визуальную часть
-        CreateVisualPrefab(unitGO, data);
-        
         // Спавним в сети
         networkObject.Spawn();
         
-        // Инициализируем юнит через ServerRpc
-        unit.InitializeServerRpc(team);
-        
-        // Инициализируем HP через ServerRpc
-        HP health = unit.GetComponent<HP>();
-        if (health != null)
-        {
-            health.InitializeServerRpc(data.MaxHealth);
-        }
+        // Инициализируем юнит через ServerRpc (отправляет данные всем клиентам)
+        unit.InitializeServerRpc(team, data.UnitName, data.MaxHealth);
         
         return unit;
-    }
-
-    private static void CreateVisualPrefab(GameObject unitGO, UnitData data)
-    {
-        if (data.UnitVisualPrefab != null)
-        {
-            GameObject visual = GameObject.Instantiate(data.UnitVisualPrefab);
-            visual.transform.SetParent(unitGO.transform);
-            visual.transform.localPosition = Vector3.zero;
-        }
     }
 }
 

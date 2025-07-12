@@ -29,25 +29,12 @@ public static class BuildingFactory
         // Устанавливаем BuildingData
         building.SetBuildingData(data);
         
-        // Создаем визуальную часть
-        CreateVisualPrefab(buildingGO, data);
-        
         // Спавним в сети
         networkObject.Spawn();
         
-        // Инициализируем здание через ServerRpc
-        building.InitializeServerRpc(team);
+        // Инициализируем здание через ServerRpc (отправляет данные всем клиентам)
+        building.InitializeServerRpc(team, data.BuildingName);
         
         return building;
-    }
-
-    private static void CreateVisualPrefab(GameObject buildingGO, BuildingData data)
-    {
-        if (data.BuildingVisualPrefab != null)
-        {
-            GameObject visual = GameObject.Instantiate(data.BuildingVisualPrefab);
-            visual.transform.SetParent(buildingGO.transform);
-            visual.transform.localPosition = Vector3.zero;
-        }
     }
 } 
