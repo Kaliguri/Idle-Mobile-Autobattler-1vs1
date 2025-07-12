@@ -36,7 +36,7 @@ public class NetworkConnectionManager : MonoBehaviour
         }
         
         NetworkManager.Singleton.StartHost();
-        Debug.Log("✅ Запущен хост (сервер + клиент)");
+        // Debug.Log("✅ Запущен хост (сервер + клиент)");
     }
     
     /// <summary>
@@ -58,7 +58,7 @@ public class NetworkConnectionManager : MonoBehaviour
         }
         
         NetworkManager.Singleton.StartServer();
-        Debug.Log("✅ Запущен сервер");
+        // Debug.Log("✅ Запущен сервер");
     }
     
     /// <summary>
@@ -86,7 +86,7 @@ public class NetworkConnectionManager : MonoBehaviour
         }
         
         NetworkManager.Singleton.StartClient();
-        Debug.Log($"✅ Подключение к серверу {serverIP}:{serverPort}");
+        // Debug.Log($"✅ Подключение к серверу {serverIP}:{serverPort}");
     }
     
     /// <summary>
@@ -103,7 +103,7 @@ public class NetworkConnectionManager : MonoBehaviour
         if (NetworkManager.Singleton.IsListening)
         {
             NetworkManager.Singleton.Shutdown();
-            Debug.Log("✅ Отключено от сервера");
+            // Debug.Log("✅ Отключено от сервера");
         }
         else
         {
@@ -117,7 +117,7 @@ public class NetworkConnectionManager : MonoBehaviour
     public void SetServerIP(string ip)
     {
         serverIP = ip;
-        Debug.Log($"IP сервера изменен на: {ip}");
+        // Debug.Log($"IP сервера изменен на: {ip}");
     }
     
     /// <summary>
@@ -126,7 +126,7 @@ public class NetworkConnectionManager : MonoBehaviour
     public void SetServerPort(ushort port)
     {
         serverPort = port;
-        Debug.Log($"Порт сервера изменен на: {port}");
+        // Debug.Log($"Порт сервера изменен на: {port}");
     }
     
     /// <summary>

@@ -50,7 +50,7 @@ public class BuildingTestSpawner : NetworkBehaviour
 
         if (playerBuildingCount[clientId] >= MAX_BUILDINGS)
         {
-            Debug.Log($"Сервер: Игрок {clientId} достиг лимита зданий: {playerBuildingCount[clientId]}/{MAX_BUILDINGS}");
+            // Debug.Log($"Сервер: Игрок {clientId} достиг лимита зданий: {playerBuildingCount[clientId]}/{MAX_BUILDINGS}");
             NotifyPlayerLimitReachedClientRpc(clientId);
             return;
         }
@@ -70,7 +70,7 @@ public class BuildingTestSpawner : NetworkBehaviour
         // Увеличиваем счетчик для игрока
         playerBuildingCount[clientId]++;
 
-        Debug.Log($"Сервер: Создаем здание {buildingData.BuildingName} для клиента {clientId} (команда {playerTeam}) на позиции {position}. Здание {playerBuildingCount[clientId]}/{MAX_BUILDINGS}");
+        // Debug.Log($"Сервер: Создаем здание {buildingData.BuildingName} для клиента {clientId} (команда {playerTeam}) на позиции {position}. Здание {playerBuildingCount[clientId]}/{MAX_BUILDINGS}");
         BuildingFactory.CreateBuilding(buildingData, position, playerTeam);
     }
 
@@ -80,7 +80,7 @@ public class BuildingTestSpawner : NetworkBehaviour
         // Уведомляем только конкретного игрока
         if (NetworkManager.Singleton.LocalClientId == targetClientId)
         {
-            Debug.Log($"Достигнут лимит зданий: {MAX_BUILDINGS}/{MAX_BUILDINGS}");
+            // Debug.Log($"Достигнут лимит зданий: {MAX_BUILDINGS}/{MAX_BUILDINGS}");
         }
     }
 

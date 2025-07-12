@@ -57,25 +57,25 @@ public class UnitAI : MonoBehaviour
         
         if (nearestEnemy != null)
         {
-            Debug.Log($"[{unit.name}] Найден ближайший враг: {nearestEnemy.name} на позиции {nearestEnemy.transform.position}");
+            // Debug.Log($"[{unit.name}] Найден ближайший враг: {nearestEnemy.name} на позиции {nearestEnemy.transform.position}");
             return nearestEnemy.transform.position;
         }
         else
         {
-            Debug.Log($"[{unit.name}] Врагов не найдено, ищем WinPoint для команды {unit.Team}");
+            // Debug.Log($"[{unit.name}] Врагов не найдено, ищем WinPoint для команды {unit.Team}");
             WinPoint winPoint = BattleInfoSingleton.Instance.GetWinPointForTeam(unit.Team);
             if (winPoint != null)
             {
-                Debug.Log($"[{unit.name}] Найден WinPoint: {winPoint.name} на позиции {winPoint.transform.position}");
+                // Debug.Log($"[{unit.name}] Найден WinPoint: {winPoint.name} на позиции {winPoint.transform.position}");
                 return winPoint.transform.position;
             }
             else
             {
-                Debug.LogWarning($"[{unit.name}] WinPoint для команды {unit.Team} не найден!");
+                // Debug.LogWarning($"[{unit.name}] WinPoint для команды {unit.Team} не найден!");
             }
         }
         
-        Debug.Log($"[{unit.name}] Возвращаем текущую позицию: {transform.position}");
+        // Debug.Log($"[{unit.name}] Возвращаем текущую позицию: {transform.position}");
         return transform.position;
     }
 

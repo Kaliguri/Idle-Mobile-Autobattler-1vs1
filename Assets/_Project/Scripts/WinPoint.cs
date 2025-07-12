@@ -12,13 +12,13 @@ public class WinPoint : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         
-        Debug.Log($"[WinPoint {name}] OnNetworkSpawn. IsServer: {IsServer}, initialTeam: {initialTeam}");
+        // Debug.Log($"[WinPoint {name}] OnNetworkSpawn. IsServer: {IsServer}, initialTeam: {initialTeam}");
         
         // Инициализируем команду из значения в инспекторе
         if (IsServer)
         {
             team.Value = initialTeam;
-            Debug.Log($"[WinPoint {name}] Сервер установил команду: {team.Value}");
+            // Debug.Log($"[WinPoint {name}] Сервер установил команду: {team.Value}");
         }
         
         // Добавляем 2D коллайдер для обнаружения юнитов, если его нет
@@ -34,29 +34,29 @@ public class WinPoint : NetworkBehaviour
         // НА СЕРВЕРЕ: регистрируем сразу с initialTeam (не ждем синхронизации NetworkVariable)
         if (IsServer)
         {
-            Debug.Log($"[WinPoint {name}] Сервер: пытаемся зарегистрировать с initialTeam: {initialTeam}");
+            // Debug.Log($"[WinPoint {name}] Сервер: пытаемся зарегистрировать с initialTeam: {initialTeam}");
             if (initialTeam != Team.Neutral)
             {
                 RegisterSelf();
             }
             else
             {
-                Debug.LogWarning($"[WinPoint {name}] Сервер: initialTeam = Neutral, не регистрируем");
+                // Debug.LogWarning($"[WinPoint {name}] Сервер: initialTeam = Neutral, не регистрируем");
             }
         }
         
         // НА КЛИЕНТЕ: ждем синхронизации через OnTeamChanged
-        Debug.Log($"[WinPoint {name}] Текущее значение team.Value: {team.Value}");
+        // Debug.Log($"[WinPoint {name}] Текущее значение team.Value: {team.Value}");
     }
     
     private void OnTeamChanged(Team previousValue, Team newValue)
     {
-        Debug.Log($"[WinPoint {name}] OnTeamChanged: {previousValue} → {newValue}. IsServer: {IsServer}");
+        // Debug.Log($"[WinPoint {name}] OnTeamChanged: {previousValue} → {newValue}. IsServer: {IsServer}");
         
         // Регистрируем WinPoint когда команда установлена (только на клиенте)
         if (!IsServer && newValue != Team.Neutral)
         {
-            Debug.Log($"[WinPoint {name}] Клиент: регистрируем после синхронизации");
+            // Debug.Log($"[WinPoint {name}] Клиент: регистрируем после синхронизации");
             RegisterSelf();
         }
     }
@@ -73,7 +73,7 @@ public class WinPoint : NetworkBehaviour
         if (BattleInfoSingleton.Instance != null)
         {
             BattleInfoSingleton.Instance.RegisterWinPoint(this);
-            Debug.Log($"[WinPoint {name}] ✅ ЗАРЕГИСТРИРОВАН для команды {Team}. IsServer: {IsServer}");
+            // Debug.Log($"[WinPoint {name}] ✅ ЗАРЕГИСТРИРОВАН для команды {Team}. IsServer: {IsServer}");
         }
         else
         {
@@ -88,24 +88,33 @@ public class WinPoint : NetworkBehaviour
         if (!IsServer) return;
         
         Unit unit = other.GetComponentInParent<Unit>();
-        if (unit != null && unit.Team != Team && unit.Team != Team.Neutral)
+        if (unit != null && unit.Team == Team && unit.Team != Team.Neutral)
         {
-            // Юнит противника достиг WinPoint
+            // Юнит своей команды достиг WinPoint
             OnWinPointReachedClientRpc(unit.Team);
             
-            // Уведомляем BattleInfoSingleton о достижении WinPoint
-            if (BattleInfoSingleton.Instance != null)
-            {
-                BattleInfoSingleton.Instance.CheckWinConditionServerRpc(unit.Team);
-            }
+            // Уведомляем о достижении WinPoint через локальный ServerRpc
+            CheckWinConditionServerRpc(unit.Team);
         }
     }
 
     [ClientRpc]
     private void OnWinPointReachedClientRpc(Team reachedByTeam)
     {
-        Debug.Log($"WinPoint команды {Team} достигнут командой {reachedByTeam}!");
+        Debug.Log($"ИГРОК {reachedByTeam} ДОСТИГ ТОЧКИ. ИГРОК {reachedByTeam} ПОБЕДИЛ!");
         
         // Здесь можно добавить визуальные эффекты или звуки
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void CheckWinConditionServerRpc(Team team)
+    {
+        if (!IsServer) return;
+        
+        // Уведомляем BattleInfoSingleton о достижении WinPoint
+        if (BattleInfoSingleton.Instance != null)
+        {
+            BattleInfoSingleton.Instance.CheckWinCondition(team);
+        }
     }
 } 

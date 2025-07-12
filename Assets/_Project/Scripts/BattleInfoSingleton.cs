@@ -32,7 +32,7 @@ public class BattleInfoSingleton : NetworkBehaviour
         
         // WinPoint объекты будут регистрировать себя сами в своем OnNetworkSpawn()
         // Это более надежный способ, чем FindObjectsOfType с задержкой
-        Debug.Log("BattleInfoSingleton инициализирован");
+        // Debug.Log("BattleInfoSingleton инициализирован");
     }
 
     private void Update()
@@ -50,26 +50,26 @@ public class BattleInfoSingleton : NetworkBehaviour
     public void FindAndRegisterAllWinPoints()
     {
         WinPoint[] winPoints = FindObjectsOfType<WinPoint>();
-        Debug.Log($"Найдено {winPoints.Length} WinPoint объектов на сцене");
+        // Debug.Log($"Найдено {winPoints.Length} WinPoint объектов на сцене");
         
         foreach (WinPoint winPoint in winPoints)
         {
             if (winPoint != null)
             {
-                Debug.Log($"Проверяем WinPoint: {winPoint.name}, Team: {winPoint.Team}");
+                // Debug.Log($"Проверяем WinPoint: {winPoint.name}, Team: {winPoint.Team}");
                 if (winPoint.Team != Team.Neutral)
                 {
                     RegisterWinPoint(winPoint);
-                    Debug.Log($"Вручную зарегистрирован WinPoint для команды {winPoint.Team}: {winPoint.name}");
+                    // Debug.Log($"Вручную зарегистрирован WinPoint для команды {winPoint.Team}: {winPoint.name}");
                 }
                 else
                 {
-                    Debug.LogWarning($"WinPoint {winPoint.name} имеет команду Neutral, пропускаем");
+                    // Debug.LogWarning($"WinPoint {winPoint.name} имеет команду Neutral, пропускаем");
                 }
             }
         }
         
-        Debug.Log($"Всего зарегистрировано WinPoint: {allWinPoints.Count}");
+        // Debug.Log($"Всего зарегистрировано WinPoint: {allWinPoints.Count}");
     }
 
     public void RegisterUnit(Unit unit)
@@ -90,11 +90,11 @@ public class BattleInfoSingleton : NetworkBehaviour
         if (!allWinPoints.Contains(winPoint))
         {
             allWinPoints.Add(winPoint);
-            Debug.Log($"[BattleInfoSingleton] ✅ Зарегистрирован WinPoint: {winPoint.name}, команда: {winPoint.Team}. Всего: {allWinPoints.Count}");
+            // Debug.Log($"[BattleInfoSingleton] ✅ Зарегистрирован WinPoint: {winPoint.name}, команда: {winPoint.Team}. Всего: {allWinPoints.Count}");
         }
         else
         {
-            Debug.LogWarning($"[BattleInfoSingleton] ⚠️ WinPoint {winPoint.name} уже зарегистрирован!");
+            // Debug.LogWarning($"[BattleInfoSingleton] ⚠️ WinPoint {winPoint.name} уже зарегистрирован!");
         }
     }
 
@@ -123,22 +123,22 @@ public class BattleInfoSingleton : NetworkBehaviour
 
     public WinPoint GetWinPointForTeam(Team team)
     {
-        Debug.Log($"Ищем WinPoint для команды {team}. Всего зарегистрировано WinPoint: {allWinPoints.Count}");
+        // Debug.Log($"Ищем WinPoint для команды {team}. Всего зарегистрировано WinPoint: {allWinPoints.Count}");
         
         foreach (WinPoint winPoint in allWinPoints)
         {
             if (winPoint != null)
             {
-                Debug.Log($"Проверяем WinPoint: {winPoint.name}, Team: {winPoint.Team}");
+                // Debug.Log($"Проверяем WinPoint: {winPoint.name}, Team: {winPoint.Team}");
                 if (winPoint.Team == team)
                 {
-                    Debug.Log($"Найден WinPoint для команды {team}: {winPoint.name}");
+                    // Debug.Log($"Найден WinPoint для команды {team}: {winPoint.name}");
                     return winPoint;
                 }
             }
         }
         
-        Debug.LogWarning($"WinPoint для команды {team} не найден!");
+        // Debug.LogWarning($"WinPoint для команды {team} не найден!");
         return null;
     }
 
@@ -181,31 +181,23 @@ public class BattleInfoSingleton : NetworkBehaviour
     [ClientRpc]
     public void WinPointReachedClientRpc(Team team)
     {
-        Debug.Log($"WinPoint достигнут командой {team}!");
+        // Debug.Log($"WinPoint достигнут командой {team}!");
         // Здесь можно добавить логику обработки достижения WinPoint
     }
 
     [ClientRpc]
     public void GameOverClientRpc(Team winnerTeam)
     {
-        Debug.Log($"Игра окончена! Победила команда {winnerTeam}!");
+        // Debug.Log($"Игра окончена! Победила команда {winnerTeam}!");
         // Здесь можно добавить логику окончания игры
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void CheckWinConditionServerRpc(Team team)
+    public void CheckWinCondition(Team winnerTeam)
     {
         if (!IsServer) return;
 
-        // Проверяем условие победы
-        WinPoint winPoint = GetWinPointForTeam(team);
-        if (winPoint != null)
-        {
-            // Логика проверки достижения WinPoint
-            WinPointReachedClientRpc(team);
-            
-            // Если условие победы выполнено, объявляем победителя
-            GameOverClientRpc(team);
-        }
+        // Если команда достигла вражеского WinPoint, она автоматически побеждает
+        WinPointReachedClientRpc(winnerTeam);
+        GameOverClientRpc(winnerTeam);
     }
 } 

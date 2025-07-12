@@ -92,13 +92,13 @@ public class SceneManagerSingleton : MonoBehaviour
 
     private void OnServerStarted()
     {
-        Debug.Log("Сервер запущен!");
+        // Debug.Log("Сервер запущен!");
         currentPlayerCount = 1; // Сервер = 1 игрок
     }
 
     private void OnClientStarted()
     {
-        Debug.Log("Клиент запущен!");
+        // Debug.Log("Клиент запущен!");
         // Обновляем количество игроков
         if (NetworkManager.Singleton != null)
         {
@@ -111,7 +111,7 @@ public class SceneManagerSingleton : MonoBehaviour
         // Проверяем, что мы в лобби и достаточно игроков
         if (SceneManager.GetActiveScene().name == lobbySceneName && currentPlayerCount >= requiredPlayers && !gameStarted)
         {
-            Debug.Log($"Достаточно игроков ({currentPlayerCount}/{requiredPlayers})! Запускаем игру...");
+            // Debug.Log($"Достаточно игроков ({currentPlayerCount}/{requiredPlayers})! Запускаем игру...");
             gameStarted = true;
             
             // Уведомляем всех клиентов о готовности игры
@@ -124,7 +124,7 @@ public class SceneManagerSingleton : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Недостаточно игроков для старта: {currentPlayerCount}/{requiredPlayers} или не в лобби или игра уже началась");
+            // Debug.Log($"Недостаточно игроков для старта: {currentPlayerCount}/{requiredPlayers} или не в лобби или игра уже началась");
         }
     }
 
@@ -149,7 +149,7 @@ public class SceneManagerSingleton : MonoBehaviour
 
     private System.Collections.IEnumerator StartGameWithDelay()
     {
-        Debug.Log($"Запускаем игру через {sceneLoadDelay} секунд...");
+        // Debug.Log($"Запускаем игру через {sceneLoadDelay} секунд...");
         yield return new WaitForSeconds(sceneLoadDelay);
         NetworkManager.Singleton.SceneManager.LoadScene(gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
@@ -157,7 +157,7 @@ public class SceneManagerSingleton : MonoBehaviour
     private System.Collections.IEnumerator LoadGameSceneWithDelay()
     {
         yield return new WaitForSeconds(sceneLoadDelay);
-        Debug.Log("Загружаем игровую сцену...");
+        // Debug.Log("Загружаем игровую сцену...");
         SceneManager.LoadScene(gameSceneName);
     }
 
