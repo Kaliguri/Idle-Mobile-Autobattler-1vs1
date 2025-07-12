@@ -1,0 +1,12 @@
+# ninja log v5
+30	257	7740316110105018	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	7b7bbb42639760b0
+260	431	7740316111745664	C:/Users/Kaliguri/Documents/UnityGame/Idle-Mobile-Autobattler-1vs1/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/5i55251l/obj/arm64-v8a/libswappywrapper.so	d3d60d859c9576fb
+11	1383	7740316121264698	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	974629cc0f5e551f
+17	1400	7740316121519639	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	46a5db51930cb709
+4	1484	7740316122212276	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	4948043225a39611
+21	1486	7740316122288154	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	875fd9f1122ccb5d
+25	1567	7740316123191054	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	21e30a5d47792ea2
+8	1676	7740316124285539	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	11b7ccf607d2a862
+14	1916	7740316126705097	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	a5e6fb7e54fac39a
+1	2152	7740316128980280	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	c5ff60b506c56f23
+2153	2274	7740316130189092	C:/Users/Kaliguri/Documents/UnityGame/Idle-Mobile-Autobattler-1vs1/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/5i55251l/obj/arm64-v8a/libgame.so	db3bdc5af1bc5f1e

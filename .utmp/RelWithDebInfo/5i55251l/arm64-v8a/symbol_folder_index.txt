@@ -1,0 +1,1 @@
+C:\Users\Kaliguri\Documents\UnityGame\Idle-Mobile-Autobattler-1vs1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\5i55251l\obj\arm64-v8a

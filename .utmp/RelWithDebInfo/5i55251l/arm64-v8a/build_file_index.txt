@@ -1,0 +1,3 @@
+C:\Users\Kaliguri\Documents\UnityGame\Idle-Mobile-Autobattler-1vs1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Users\Kaliguri\Documents\UnityGame\Idle-Mobile-Autobattler-1vs1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\FramePacing\CMakeLists.txt
+C:\Users\Kaliguri\Documents\UnityGame\Idle-Mobile-Autobattler-1vs1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
