@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public static class BuildingFactory
@@ -10,27 +11,32 @@ public static class BuildingFactory
             return null;
         }
 
-        // Создаем GameObject для здания
-        GameObject buildingGO = new GameObject($"Building_{data.BuildingName}_{team}");
+        if (!NetworkManager.Singleton.IsServer)
+        {
+            Debug.LogError("CreateBuilding can only be called on server!");
+            return null;
+        }
+
+        // Создаем здание из префаба
+        GameObject buildingGO = Object.Instantiate(NetworkDBSingleton.Instance.BuildingNetworkPrefab);
+        buildingGO.name = $"Building_{data.BuildingName}_{team}";
         buildingGO.transform.position = position;
-        // Добавляем компоненты
-        Building building = AddComponents(buildingGO, data);
+        
+        // Получаем компоненты из префаба
+        NetworkObject networkObject = buildingGO.GetComponent<NetworkObject>();
+        Building building = buildingGO.GetComponent<Building>();
+        
+        // Устанавливаем BuildingData
+        building.SetBuildingData(data);
+        
         // Создаем визуальную часть
         CreateVisualPrefab(buildingGO, data);
-        // Инициализируем здание с данными и командой
-        building.Initialize(data, team);
         
-        return building;
-    }
-
-    private static Building AddComponents(GameObject buildingGO, BuildingData data)
-    {
-        Building building = buildingGO.AddComponent<Building>();
+        // Спавним в сети
+        networkObject.Spawn();
         
-        if (data.CanSpawnUnits)
-        {
-            buildingGO.AddComponent<UnitSpawner>();
-        }
+        // Инициализируем здание через ServerRpc
+        building.InitializeServerRpc(team);
         
         return building;
     }

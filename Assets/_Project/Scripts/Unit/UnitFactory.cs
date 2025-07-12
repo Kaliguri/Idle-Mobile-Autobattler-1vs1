@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public static class UnitFactory
@@ -10,30 +11,39 @@ public static class UnitFactory
             return null;
         }
 
-        // Создаем GameObject для юнита
-        GameObject unitGO = new GameObject($"Unit_{data.UnitName}_{team}");
+        if (!NetworkManager.Singleton.IsServer)
+        {
+            Debug.LogError("CreateUnit can only be called on server!");
+            return null;
+        }
+
+        // Создаем юнит из префаба
+        GameObject unitGO = Object.Instantiate(NetworkDBSingleton.Instance.UnitNetworkPrefab);
+        unitGO.name = $"Unit_{data.UnitName}_{team}";
         unitGO.transform.position = position;
-        // Добавляем компоненты
-        Unit unit = AddComponents(unitGO, data);
+        
+        // Получаем компоненты из префаба
+        NetworkObject networkObject = unitGO.GetComponent<NetworkObject>();
+        Unit unit = unitGO.GetComponent<Unit>();
+        
+        // Устанавливаем UnitData
+        unit.SetUnitData(data);
+        
         // Создаем визуальную часть
         CreateVisualPrefab(unitGO, data);
-        // Инициализируем юнит с данными и командой
-        unit.Initialize(data, team);
         
-        // Регистрируем юнит в BattleInfo
-        BattleInfoSingleton.Instance.RegisterUnit(unit);
+        // Спавним в сети
+        networkObject.Spawn();
         
-        return unit;
-    }
-
-    private static Unit AddComponents(GameObject unitGO, UnitData data)
-    {
-        Unit unit = unitGO.AddComponent<Unit>();
-        UnitAI ai = unitGO.AddComponent<UnitAI>();
-        HP health = unitGO.AddComponent<HP>();
+        // Инициализируем юнит через ServerRpc
+        unit.InitializeServerRpc(team);
         
-        // Инициализируем HP с данными из UnitData
-        health.Initialize(data.MaxHealth);
+        // Инициализируем HP через ServerRpc
+        HP health = unit.GetComponent<HP>();
+        if (health != null)
+        {
+            health.InitializeServerRpc(data.MaxHealth);
+        }
         
         return unit;
     }

@@ -1,29 +1,47 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class Building : MonoBehaviour
+public class Building : NetworkBehaviour
 {
-    protected BuildingData buildingData;
-    protected Team team;
-    protected bool isActive = true;
+    [SerializeField] protected BuildingData buildingData;
+    private NetworkVariable<Team> team = new NetworkVariable<Team>();
+    private NetworkVariable<bool> isActive = new NetworkVariable<bool>(true);
 
     public BuildingData BuildingData => buildingData;
-    public Team Team => team;
-    public bool IsActive => isActive;
+    public Team Team => team.Value;
+    public bool IsActive => isActive.Value;
 
-    public void Initialize(BuildingData data, Team team)
+    public void SetBuildingData(BuildingData data)
     {
         buildingData = data;
-        this.team = team;
+    }
 
-        if (data.CanSpawnUnits)
+    [ServerRpc(RequireOwnership = false)]
+    public void InitializeServerRpc(Team buildingTeam)
+    {
+        if (!IsServer) return;
+        
+        team.Value = buildingTeam;
+        isActive.Value = true;
+
+        if (buildingData != null && buildingData.CanSpawnUnits)
         {
+            // Включаем и инициализируем UnitSpawner после установки данных
             UnitSpawner spawner = GetComponent<UnitSpawner>();
-            spawner.Initialize(this);
+            if (spawner != null)
+            {
+                spawner.enabled = true;
+                spawner.Initialize(this);
+            }
         }
     }
 
-    public void SetActive(bool active)
+    [ServerRpc(RequireOwnership = false)]
+    public void SetActiveServerRpc(bool active)
     {
-        isActive = active;
+        if (IsServer)
+        {
+            isActive.Value = active;
+        }
     }
 } 

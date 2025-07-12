@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class UnitAI : MonoBehaviour
@@ -12,7 +13,8 @@ public class UnitAI : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (unit != null && unit.IsActive)
+        // Работаем только если компонент включен и юнит инициализирован
+        if (enabled && unit != null && unit.IsActive)
         {
             ProcessAI();
         }
@@ -21,6 +23,12 @@ public class UnitAI : MonoBehaviour
     private void ProcessAI()
     {
         if (unit == null) return;
+        
+        // ИИ юнитов работает только на сервере
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
+        
+        // Проверяем, что BattleInfoSingleton существует
+        if (BattleInfoSingleton.Instance == null) return;
         
         Unit nearestEnemy = BattleInfoSingleton.Instance.FindNearestEnemy(transform.position, unit.Team);
         bool isEnemyInRange = nearestEnemy != null && Vector3.Distance(transform.position, nearestEnemy.transform.position) <= unit.UnitData.AttackRange;
@@ -76,7 +84,8 @@ public class UnitAI : MonoBehaviour
         HP targetHP = target.GetComponent<HP>();
         if (targetHP != null)
         {
-            targetHP.TakeDamage(unit.UnitData.Damage);
+            // Вызываем атаку через ServerRpc
+            targetHP.TakeDamageServerRpc(unit.UnitData.Damage);
         }
         
         canAttack = false;

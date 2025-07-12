@@ -1,47 +1,62 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class HP : MonoBehaviour
+public class HP : NetworkBehaviour
 {
-    [SerializeField] private float maxHealth = 100f;
-    [SerializeField] private float currentHealth;
+    private NetworkVariable<float> maxHealth = new NetworkVariable<float>(100f);
+    private NetworkVariable<float> currentHealth = new NetworkVariable<float>();
 
-    public float MaxHealth => maxHealth;
-    public float CurrentHealth => currentHealth;
-    public bool IsDead => currentHealth <= 0;
+    public float MaxHealth => maxHealth.Value;
+    public float CurrentHealth => currentHealth.Value;
+    public bool IsDead => currentHealth.Value <= 0;
 
-    public void Initialize(float maxHP)
+    [ServerRpc(RequireOwnership = false)]
+    public void InitializeServerRpc(float maxHP)
     {
-        maxHealth = maxHP;
-        currentHealth = maxHealth;
-    }
-
-    public void ChangeHealth(float amount)
-    {
-        currentHealth += amount;
-        
-        if (currentHealth > maxHealth)
+        if (IsServer)
         {
-            currentHealth = maxHealth;
-        }
-        
-        if (currentHealth <= 0)
-        {
-            currentHealth = 0;
-            Die();
+            maxHealth.Value = maxHP;
+            currentHealth.Value = maxHP;
         }
     }
 
-    public void TakeDamage(float damage)
+    [ServerRpc(RequireOwnership = false)]
+    public void ChangeHealthServerRpc(float amount)
     {
-        ChangeHealth(-damage);
+        if (!IsServer) return;
+        
+        currentHealth.Value += amount;
+        
+        if (currentHealth.Value > maxHealth.Value)
+        {
+            currentHealth.Value = maxHealth.Value;
+        }
+        
+        if (currentHealth.Value <= 0)
+        {
+            currentHealth.Value = 0;
+            DieClientRpc();
+        }
     }
 
-    public void Heal(float healAmount)
+    [ServerRpc(RequireOwnership = false)]
+    public void TakeDamageServerRpc(float damage)
     {
-        ChangeHealth(healAmount);
+        if (!IsServer) return;
+        
+        ChangeHealthServerRpc(-damage);
     }
 
-    private void Die()
+    [ServerRpc(RequireOwnership = false)]
+    public void HealServerRpc(float healAmount)
+    {
+        if (!IsServer) return;
+        
+        ChangeHealthServerRpc(healAmount);
+    }
+
+    [ClientRpc]
+    private void DieClientRpc()
     {
         Unit unit = GetComponent<Unit>();
         
@@ -50,6 +65,9 @@ public class HP : MonoBehaviour
             BattleInfoSingleton.Instance.UnregisterUnit(unit);
         }
         
-        Destroy(gameObject);
+        if (IsServer)
+        {
+            NetworkObject.Despawn(true);
+        }
     }
 } 

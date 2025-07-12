@@ -1,14 +1,17 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class BattleInfoSingleton : MonoBehaviour
+public class BattleInfoSingleton : NetworkBehaviour
 {
     private static BattleInfoSingleton instance;
 
     private List<Unit> allUnits = new List<Unit>();
     private List<WinPoint> allWinPoints = new List<WinPoint>();
+    private NetworkVariable<float> gameTime = new NetworkVariable<float>(0f);
 
     public static BattleInfoSingleton Instance => instance;
+    public float GameTime => gameTime.Value;
 
     private void Awake()
     {
@@ -23,25 +26,50 @@ public class BattleInfoSingleton : MonoBehaviour
         }
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
-        // Автоматически находим и регистрируем все WinPoint на сцене
-        FindAndRegisterAllWinPoints();
+        base.OnNetworkSpawn();
+        
+        // WinPoint объекты будут регистрировать себя сами в своем OnNetworkSpawn()
+        // Это более надежный способ, чем FindObjectsOfType с задержкой
+        Debug.Log("BattleInfoSingleton инициализирован");
     }
 
-    private void FindAndRegisterAllWinPoints()
+    private void Update()
+    {
+        if (IsServer)
+        {
+            gameTime.Value += Time.deltaTime;
+        }
+    }
+
+    /// <summary>
+    /// Ручная регистрация всех WinPoint на сцене (для отладки)
+    /// </summary>
+    [ContextMenu("Найти и зарегистрировать все WinPoint")]
+    public void FindAndRegisterAllWinPoints()
     {
         WinPoint[] winPoints = FindObjectsOfType<WinPoint>();
-        //Debug.Log($"Найдено {winPoints.Length} WinPoint объектов на сцене");
+        Debug.Log($"Найдено {winPoints.Length} WinPoint объектов на сцене");
         
         foreach (WinPoint winPoint in winPoints)
         {
-            if (winPoint != null && winPoint.Team != Team.Neutral)
+            if (winPoint != null)
             {
-                RegisterWinPoint(winPoint);
-                //Debug.Log($"Автоматически зарегистрирован WinPoint для команды {winPoint.Team}: {winPoint.name}");
+                Debug.Log($"Проверяем WinPoint: {winPoint.name}, Team: {winPoint.Team}");
+                if (winPoint.Team != Team.Neutral)
+                {
+                    RegisterWinPoint(winPoint);
+                    Debug.Log($"Вручную зарегистрирован WinPoint для команды {winPoint.Team}: {winPoint.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"WinPoint {winPoint.name} имеет команду Neutral, пропускаем");
+                }
             }
         }
+        
+        Debug.Log($"Всего зарегистрировано WinPoint: {allWinPoints.Count}");
     }
 
     public void RegisterUnit(Unit unit)
@@ -62,6 +90,11 @@ public class BattleInfoSingleton : MonoBehaviour
         if (!allWinPoints.Contains(winPoint))
         {
             allWinPoints.Add(winPoint);
+            Debug.Log($"[BattleInfoSingleton] ✅ Зарегистрирован WinPoint: {winPoint.name}, команда: {winPoint.Team}. Всего: {allWinPoints.Count}");
+        }
+        else
+        {
+            Debug.LogWarning($"[BattleInfoSingleton] ⚠️ WinPoint {winPoint.name} уже зарегистрирован!");
         }
     }
 
@@ -90,13 +123,22 @@ public class BattleInfoSingleton : MonoBehaviour
 
     public WinPoint GetWinPointForTeam(Team team)
     {
+        Debug.Log($"Ищем WinPoint для команды {team}. Всего зарегистрировано WinPoint: {allWinPoints.Count}");
+        
         foreach (WinPoint winPoint in allWinPoints)
         {
-            if (winPoint != null && winPoint.Team == team)
+            if (winPoint != null)
             {
-                return winPoint;
+                Debug.Log($"Проверяем WinPoint: {winPoint.name}, Team: {winPoint.Team}");
+                if (winPoint.Team == team)
+                {
+                    Debug.Log($"Найден WinPoint для команды {team}: {winPoint.name}");
+                    return winPoint;
+                }
             }
         }
+        
+        Debug.LogWarning($"WinPoint для команды {team} не найден!");
         return null;
     }
 
@@ -134,5 +176,36 @@ public class BattleInfoSingleton : MonoBehaviour
             }
         }
         return count;
+    }
+
+    [ClientRpc]
+    public void WinPointReachedClientRpc(Team team)
+    {
+        Debug.Log($"WinPoint достигнут командой {team}!");
+        // Здесь можно добавить логику обработки достижения WinPoint
+    }
+
+    [ClientRpc]
+    public void GameOverClientRpc(Team winnerTeam)
+    {
+        Debug.Log($"Игра окончена! Победила команда {winnerTeam}!");
+        // Здесь можно добавить логику окончания игры
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void CheckWinConditionServerRpc(Team team)
+    {
+        if (!IsServer) return;
+
+        // Проверяем условие победы
+        WinPoint winPoint = GetWinPointForTeam(team);
+        if (winPoint != null)
+        {
+            // Логика проверки достижения WinPoint
+            WinPointReachedClientRpc(team);
+            
+            // Если условие победы выполнено, объявляем победителя
+            GameOverClientRpc(team);
+        }
     }
 } 
