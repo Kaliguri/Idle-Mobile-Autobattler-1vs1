@@ -1,92 +1,50 @@
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using Unity.Services.Core;
+using Unity.Services.Authentication;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using System.Threading.Tasks;
 
 public class NetworkConnectionManager : MonoBehaviour
 {
-    [Header("Connection Settings")]
-    [SerializeField] private string serverIP = "127.0.0.1";
-    [SerializeField] private ushort serverPort = 7777;
+    [Header("Relay Settings")]
+    private const int MAX_PLAYERS = 2;
+    private string currentJoinCode = "";
     
-    private void Start()
+    private async void Start()
     {
         // Проверяем, что NetworkManager существует
         if (NetworkManager.Singleton == null)
         {
             Debug.LogError("NetworkManager не найден на сцене!");
+            return;
         }
+        
+        // Инициализируем Unity Gaming Services
+        await InitializeUnityServices();
     }
     
-    /// <summary>
-    /// Запускает хост (сервер + клиент на одном устройстве)
-    /// Навесить на кнопку Host
-    /// </summary>
-    public void StartHost()
+    private async Task InitializeUnityServices()
     {
-        if (NetworkManager.Singleton == null)
+        try
         {
-            Debug.LogError("NetworkManager не найден!");
-            return;
+            // Инициализация Unity Gaming Services
+            await UnityServices.InitializeAsync();
+            
+            // Анонимная аутентификация
+            if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            }
+            
+            Debug.Log("Unity Gaming Services инициализированы");
         }
-        
-        if (NetworkManager.Singleton.IsListening)
+        catch (System.Exception e)
         {
-            Debug.LogWarning("Уже подключен к серверу!");
-            return;
+            Debug.LogError($"Ошибка инициализации Unity Gaming Services: {e.Message}");
         }
-        
-        NetworkManager.Singleton.StartHost();
-        // Debug.Log("✅ Запущен хост (сервер + клиент)");
-    }
-    
-    /// <summary>
-    /// Запускает сервер (только сервер, без клиента)
-    /// Навесить на кнопку Server
-    /// </summary>
-    public void StartServer()
-    {
-        if (NetworkManager.Singleton == null)
-        {
-            Debug.LogError("NetworkManager не найден!");
-            return;
-        }
-        
-        if (NetworkManager.Singleton.IsListening)
-        {
-            Debug.LogWarning("Уже запущен сервер!");
-            return;
-        }
-        
-        NetworkManager.Singleton.StartServer();
-        // Debug.Log("✅ Запущен сервер");
-    }
-    
-    /// <summary>
-    /// Подключается к серверу как клиент
-    /// </summary>
-    public void StartClient()
-    {
-        if (NetworkManager.Singleton == null)
-        {
-            Debug.LogError("NetworkManager не найден!");
-            return;
-        }
-        
-        if (NetworkManager.Singleton.IsListening)
-        {
-            Debug.LogWarning("Уже подключен к серверу!");
-            return;
-        }
-        
-        // Настраиваем подключение к серверу
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        if (transport != null)
-        {
-            transport.SetConnectionData(serverIP, serverPort);
-        }
-        
-        NetworkManager.Singleton.StartClient();
-        // Debug.Log($"✅ Подключение к серверу {serverIP}:{serverPort}");
     }
     
     /// <summary>
@@ -109,24 +67,6 @@ public class NetworkConnectionManager : MonoBehaviour
         {
             Debug.LogWarning("Не подключен к серверу!");
         }
-    }
-    
-    /// <summary>
-    /// Устанавливает IP адрес сервера
-    /// </summary>
-    public void SetServerIP(string ip)
-    {
-        serverIP = ip;
-        // Debug.Log($"IP сервера изменен на: {ip}");
-    }
-    
-    /// <summary>
-    /// Устанавливает порт сервера
-    /// </summary>
-    public void SetServerPort(ushort port)
-    {
-        serverPort = port;
-        // Debug.Log($"Порт сервера изменен на: {port}");
     }
     
     /// <summary>
@@ -159,5 +99,99 @@ public class NetworkConnectionManager : MonoBehaviour
     public bool IsClient()
     {
         return NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient;
+    }
+    
+    /// <summary>
+    /// Создает игру через Relay и возвращает код для подключения
+    /// </summary>
+    public async void CreateGameWithRelay()
+    {
+        try
+        {
+            // Создаем Relay allocation
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(MAX_PLAYERS);
+            
+            // Получаем Join Code
+            currentJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            
+            // Отображаем код в UI через MainMenuUIManager
+            if (MainMenuUIManager.Instance != null)
+            {
+                MainMenuUIManager.Instance.DisplayCode(currentJoinCode);
+            }
+            
+            // Настраиваем транспорт для Relay
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetRelayServerData(
+                allocation.RelayServer.IpV4, 
+                (ushort)allocation.RelayServer.Port, 
+                allocation.AllocationIdBytes, 
+                allocation.Key, 
+                allocation.ConnectionData
+            );
+            
+            // Запускаем хост
+            NetworkManager.Singleton.StartHost();
+            
+            Debug.Log($"Игра создана через Relay! Код: {currentJoinCode}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Ошибка создания игры через Relay: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Подключается к игре по коду через Relay
+    /// </summary>
+    public async void JoinGameWithRelay()
+    {
+        try
+        {
+            string joinCode = "";
+            
+            // Получаем код из MainMenuUIManager
+            if (MainMenuUIManager.Instance != null)
+            {
+                joinCode = MainMenuUIManager.Instance.GetInputCode();
+            }
+            
+            if (string.IsNullOrEmpty(joinCode))
+            {
+                Debug.LogError("Введите код для подключения!");
+                return;
+            }
+            
+            // Подключаемся к Relay
+            JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+            
+            // Настраиваем транспорт для Relay
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetRelayServerData(
+                allocation.RelayServer.IpV4, 
+                (ushort)allocation.RelayServer.Port,
+                allocation.AllocationIdBytes, 
+                allocation.Key, 
+                allocation.ConnectionData, 
+                allocation.HostConnectionData
+            );
+            
+            // Подключаемся как клиент
+            NetworkManager.Singleton.StartClient();
+            
+            Debug.Log($"Подключение к игре через Relay с кодом: {joinCode}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Ошибка подключения через Relay: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Получает текущий код подключения
+    /// </summary>
+    public string GetCurrentJoinCode()
+    {
+        return currentJoinCode;
     }
 } 

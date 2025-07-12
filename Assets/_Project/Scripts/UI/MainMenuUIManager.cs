@@ -1,6 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainMenuUIManager : MonoBehaviour
 {
@@ -14,8 +15,12 @@ public class MainMenuUIManager : MonoBehaviour
     [Header("Current UI")]
     [SerializeField] private GameObject currentUI;
     
+    [Header("Main Menu UI")]
+    [SerializeField] private TMP_InputField codeInputField; // Поле для ввода кода
+    
     [Header("Lobby UI")]
-    [SerializeField] private TMPro.TextMeshProUGUI statusText;
+    [SerializeField] private TextMeshProUGUI statusText;
+    [SerializeField] private TextMeshProUGUI codeDisplayText; // Текст для отображения кода
     [SerializeField] private Button exitButton;
     
     [SerializeField] private string readyText = "Starting the match...";
@@ -168,5 +173,60 @@ public class MainMenuUIManager : MonoBehaviour
             
             exitButton.gameObject.SetActive(!shouldDisableExit);
         }
+    }
+    
+    /// <summary>
+    /// Создает игру через Relay
+    /// </summary>
+    public void CreateGame()
+    {
+        var networkManager = FindObjectOfType<NetworkConnectionManager>();
+        if (networkManager != null)
+        {
+            networkManager.CreateGameWithRelay();
+        }
+        else
+        {
+            Debug.LogError("NetworkConnectionManager не найден!");
+        }
+    }
+    
+    /// <summary>
+    /// Подключается к игре по коду
+    /// </summary>
+    public void JoinGame()
+    {
+        var networkManager = FindObjectOfType<NetworkConnectionManager>();
+        if (networkManager != null)
+        {
+            networkManager.JoinGameWithRelay();
+        }
+        else
+        {
+            Debug.LogError("NetworkConnectionManager не найден!");
+        }
+    }
+    
+    /// <summary>
+    /// Отображает код в лобби
+    /// </summary>
+    public void DisplayCode(string code)
+    {
+        if (codeDisplayText != null)
+        {
+            codeDisplayText.text = code;
+        }
+    }
+    
+    /// <summary>
+    /// Получает введенный код
+    /// </summary>
+    public string GetInputCode()
+    {
+        if (codeInputField != null)
+        {
+            return codeInputField.text.Trim().ToUpper();
+        }
+        return "";
     }
 } 
